@@ -1,17 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://08le148u6u2b"]
+[gd_scene format=3 uid="uid://08le148u6u2b"]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
-[ext_resource type="Texture2D" path="res://assets/backgrounds/gothic_rural_ground.png" id="2_background"]
+[ext_resource type="Texture2D" uid="uid://df8u0xxb2k20" path="res://assets/backgrounds/gothic_rural_ground.png" id="2_background"]
+[ext_resource type="PackedScene" path="res://scenes/enemy_spawner.tscn" id="3_spawner"]
 
 [node name="Main" type="Node2D" unique_id=214983482]
 
-[node name="Background" type="Sprite2D" parent="."]
+[node name="Background" type="Sprite2D" parent="." unique_id=1816627481]
+z_index = -10
 texture_filter = 1
 texture_repeat = 2
-z_index = -10
+position = Vector2(8, 8)
+scale = Vector2(1.1887354, 0.9880962)
 texture = ExtResource("2_background")
 region_enabled = true
 region_rect = Rect2(-2048, -2048, 4096, 4096)
 
 [node name="Player" parent="." unique_id=1594124320 instance=ExtResource("1_player")]
 position = Vector2(3, 5)
+
+[node name="EnemySpawner" parent="." instance=ExtResource("3_spawner")]
