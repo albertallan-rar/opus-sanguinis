@@ -8,28 +8,31 @@ func _initialize() -> void:
 
 
 func _run_test() -> void:
-	var world: Node2D = Node2D.new()
-	root.add_child(world)
-	current_scene = world
-
+	var world: GameFlow = GameFlow.new()
 	var player: Player = preload("res://scenes/player.tscn").instantiate()
 	world.add_child(player)
 	var hud: HUD = preload("res://scenes/hud.tscn").instantiate()
 	world.add_child(hud)
+	root.add_child(world)
+	current_scene = world
 	await process_frame
 
 	var damage_label: Label = hud.get_node_or_null("LancetDamageLabel") as Label
 	var interval_label: Label = hud.get_node_or_null("LancetIntervalLabel") as Label
 	var health_label: Label = hud.get_node_or_null("HealthLabel") as Label
+	var survival_time_label: Label = hud.get_node_or_null("SurvivalTimeLabel") as Label
 	_expect(damage_label != null, "HUD contains a permanent Lancet damage label")
 	_expect(interval_label != null, "HUD contains a permanent Lancet interval label")
 	_expect(health_label != null, "HUD contains a permanent health label")
+	_expect(survival_time_label != null, "HUD contains a survival time label")
 	if damage_label != null:
 		_expect_equal(damage_label.text, "Dano da Lanceta: 1", "HUD displays initial weapon damage")
 	if interval_label != null:
 		_expect_equal(interval_label.text, "Intervalo da Lanceta: 1,00s", "HUD displays initial attack interval")
 	if health_label != null:
 		_expect_equal(health_label.text, "Vida: 10 / 10", "HUD displays initial player health")
+	if survival_time_label != null:
+		_expect_equal(survival_time_label.text, "Tempo: 00:00", "HUD displays zero survival time initially")
 
 	var weapon: LancetWeapon = player.get_node("LancetWeapon") as LancetWeapon
 	weapon.increase_damage()
@@ -41,6 +44,9 @@ func _run_test() -> void:
 	player.take_damage(3)
 	if health_label != null:
 		_expect_equal(health_label.text, "Vida: 7 / 10", "HUD updates when player health changes")
+	world._process(65.0)
+	if survival_time_label != null:
+		_expect_equal(survival_time_label.text, "Tempo: 01:05", "HUD formats and updates survival time")
 
 	current_scene = null
 	world.free()

@@ -1,14 +1,22 @@
 class_name HUD
 extends CanvasLayer
 
+var _game_flow: GameFlow
+
 @onready var _experience_label: Label = $ExperienceLabel
 @onready var _level_label: Label = $LevelLabel
 @onready var _lancet_damage_label: Label = $LancetDamageLabel
 @onready var _lancet_interval_label: Label = $LancetIntervalLabel
 @onready var _health_label: Label = $HealthLabel
+@onready var _survival_time_label: Label = $SurvivalTimeLabel
 
 
 func _ready() -> void:
+	_game_flow = get_parent() as GameFlow
+	if _game_flow != null:
+		_game_flow.survival_time_changed.connect(_on_survival_time_changed)
+		_on_survival_time_changed(_game_flow.survival_seconds)
+
 	var player: Node = get_tree().get_first_node_in_group(&"player")
 	if player == null:
 		return
@@ -46,3 +54,9 @@ func _on_lancet_interval_changed(current_interval: float) -> void:
 
 func _on_health_changed(current_health: int, maximum_health: int) -> void:
 	_health_label.text = "Vida: %d / %d" % [current_health, maximum_health]
+
+
+func _on_survival_time_changed(total_seconds: int) -> void:
+	var minutes: int = floori(total_seconds / 60.0)
+	var seconds: int = total_seconds % 60
+	_survival_time_label.text = "Tempo: %02d:%02d" % [minutes, seconds]

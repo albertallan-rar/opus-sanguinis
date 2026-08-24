@@ -44,3 +44,16 @@ offset_right = 336.0
 offset_bottom = 170.0
 theme_override_font_sizes/font_size = 24
 text = "Intervalo da Lanceta: 1,00s"
+
+[node name="SurvivalTimeLabel" type="Label" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -216.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 50.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 24
+text = "Tempo: 00:00"
+horizontal_alignment = 2

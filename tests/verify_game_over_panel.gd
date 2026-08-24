@@ -22,14 +22,19 @@ func _run_test() -> void:
 
 	_expect(not panel.visible, "game over panel starts hidden")
 	var player: Player = main.get_node("Player") as Player
+	main.call(&"_process", 65.0)
 	player.level = 3
 	player.take_damage(10)
 
 	var level_label: Label = panel.get_node("Overlay/PanelContainer/MarginContainer/VBoxContainer/LevelLabel") as Label
+	var time_label: Label = panel.get_node_or_null("Overlay/PanelContainer/MarginContainer/VBoxContainer/TimeLabel") as Label
 	_expect(paused, "death keeps the game tree paused")
 	_expect(panel.visible, "death opens the game over panel")
 	_expect_equal(panel.process_mode, Node.PROCESS_MODE_ALWAYS, "panel processes while paused")
 	_expect_equal(level_label.text, "Nível alcançado: 3", "panel displays the reached level")
+	_expect(time_label != null, "game over panel contains the final survival time")
+	if time_label != null:
+		_expect_equal(time_label.text, "Tempo sobrevivido: 01:05", "panel displays final survival time")
 
 	var previous_scene_id: int = main.get_instance_id()
 	var restart_button: Button = panel.get_node("Overlay/PanelContainer/MarginContainer/VBoxContainer/RestartButton") as Button
@@ -41,11 +46,15 @@ func _run_test() -> void:
 	var scene_was_replaced: bool = current_scene != null and current_scene.get_instance_id() != previous_scene_id
 	_expect(scene_was_replaced, "restart replaces the previous scene")
 	if scene_was_replaced:
+		var new_flow: GameFlow = current_scene as GameFlow
 		var new_player: Player = current_scene.get_node("Player") as Player
 		_expect_equal(new_player.level, 1, "restart resets level")
 		_expect_equal(new_player.experience, 0, "restart resets experience")
 		_expect_equal(new_player.current_health, 10, "restart restores health")
 		_expect_equal(new_player.get_node("LancetWeapon").get("damage"), 1, "restart resets weapon damage")
+		_expect_equal(new_flow.survival_seconds, 0, "restart resets survival time")
+		var new_hud: HUD = current_scene.get_node("HUD") as HUD
+		_expect_equal(new_hud.get_node("SurvivalTimeLabel").get("text"), "Tempo: 00:00", "restarted HUD displays zero time")
 
 	_cleanup(current_scene if current_scene != null else main)
 	_finish()
