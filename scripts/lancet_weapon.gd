@@ -1,8 +1,16 @@
 class_name LancetWeapon
 extends Node2D
 
+signal damage_changed(current_damage: int)
+
 @export var lancet_scene: PackedScene
 @export var attack_range: float = 600.0
+@export var damage: int = 1
+
+
+func increase_damage(amount: int = 1) -> void:
+	damage += amount
+	damage_changed.emit(damage)
 
 
 func _on_attack_timer_timeout() -> void:
@@ -14,7 +22,8 @@ func _on_attack_timer_timeout() -> void:
 	if distance > attack_range:
 		return
 
-	var lancet: Area2D = lancet_scene.instantiate() as Area2D
+	var lancet: Lancet = lancet_scene.instantiate() as Lancet
+	lancet.damage = damage
 	get_tree().current_scene.add_child(lancet)
 	lancet.global_position = global_position
 	lancet.call("launch", global_position.direction_to(target.global_position))
