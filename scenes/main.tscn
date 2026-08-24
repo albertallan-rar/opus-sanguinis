@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="4_hud"]
 [ext_resource type="PackedScene" path="res://scenes/upgrade_panel.tscn" id="5_upgrade_panel"]
 [ext_resource type="Script" path="res://scripts/game_flow.gd" id="6_game_flow"]
+[ext_resource type="PackedScene" path="res://scenes/game_over_panel.tscn" id="7_game_over_panel"]
 
 [node name="Main" type="Node2D" unique_id=214983482]
 script = ExtResource("6_game_flow")
@@ -28,3 +29,5 @@ position = Vector2(3, 5)
 [node name="HUD" parent="." instance=ExtResource("4_hud")]
 
 [node name="UpgradePanel" parent="." instance=ExtResource("5_upgrade_panel")]
+
+[node name="GameOverPanel" parent="." instance=ExtResource("7_game_over_panel")]
