@@ -10,6 +10,8 @@ func _initialize() -> void:
 func _run_tests() -> void:
 	_test_increase_damage_updates_state_and_emits_signal()
 	_test_new_projectile_receives_current_weapon_damage()
+	await _test_attack_speed_reduces_interval_and_updates_timer()
+	await _test_attack_speed_stops_at_minimum_interval()
 
 	if _failures == 0:
 		print("LANCET_WEAPON_DAMAGE_TESTS_PASSED")
@@ -43,8 +45,7 @@ func _test_new_projectile_receives_current_weapon_damage() -> void:
 	root.add_child(world)
 	current_scene = world
 
-	var weapon: LancetWeapon = LancetWeapon.new()
-	weapon.set("lancet_scene", preload("res://scenes/lancet.tscn"))
+	var weapon: LancetWeapon = preload("res://scenes/lancet_weapon.tscn").instantiate()
 	world.add_child(weapon)
 
 	var enemy: CharacterBody2D = CharacterBody2D.new()
@@ -70,6 +71,53 @@ func _test_new_projectile_receives_current_weapon_damage() -> void:
 	world.free()
 
 
+func _test_attack_speed_reduces_interval_and_updates_timer() -> void:
+	var weapon: LancetWeapon = preload("res://scenes/lancet_weapon.tscn").instantiate()
+	root.add_child(weapon)
+	await process_frame
+
+	_expect(weapon.has_signal(&"attack_interval_changed"), "weapon exposes attack_interval_changed")
+	_expect(weapon.has_method(&"increase_attack_speed"), "weapon exposes increase_attack_speed")
+	_expect(weapon.has_method(&"get_next_attack_interval"), "weapon exposes get_next_attack_interval")
+	if not weapon.has_signal(&"attack_interval_changed") or not weapon.has_method(&"increase_attack_speed"):
+		weapon.free()
+		return
+
+	var emitted_values: Array[float] = []
+	weapon.connect(&"attack_interval_changed", func(value: float) -> void: emitted_values.append(value))
+	var changed: bool = weapon.call(&"increase_attack_speed")
+
+	_expect(changed, "speed upgrade changes an interval above the minimum")
+	_expect_float(weapon.get("attack_interval"), 0.9, "speed upgrade reduces interval by ten percent")
+	_expect_float(weapon.get_node("AttackTimer").wait_time, 0.9, "timer receives the new interval")
+	_expect_equal(emitted_values, [0.9], "interval change emits the new value")
+	weapon.free()
+
+
+func _test_attack_speed_stops_at_minimum_interval() -> void:
+	var weapon: LancetWeapon = preload("res://scenes/lancet_weapon.tscn").instantiate()
+	root.add_child(weapon)
+	await process_frame
+
+	if not weapon.has_signal(&"attack_interval_changed") or not weapon.has_method(&"increase_attack_speed"):
+		weapon.free()
+		return
+
+	var emitted_values: Array[float] = []
+	weapon.connect(&"attack_interval_changed", func(value: float) -> void: emitted_values.append(value))
+	weapon.set("attack_interval", 0.21)
+
+	var first_changed: bool = weapon.call(&"increase_attack_speed")
+	var second_changed: bool = weapon.call(&"increase_attack_speed")
+
+	_expect(first_changed, "upgrade can reach the minimum interval")
+	_expect(not second_changed, "upgrade at the minimum interval is rejected")
+	_expect_float(weapon.get("attack_interval"), 0.2, "interval never drops below the minimum")
+	_expect_float(weapon.get_node("AttackTimer").wait_time, 0.2, "timer is clamped to the minimum")
+	_expect_equal(emitted_values, [0.2], "rejected upgrade emits no additional signal")
+	weapon.free()
+
+
 func _expect(condition: bool, message: String) -> void:
 	if condition:
 		return
@@ -79,6 +127,13 @@ func _expect(condition: bool, message: String) -> void:
 
 func _expect_equal(actual: Variant, expected: Variant, message: String) -> void:
 	if actual == expected:
+		return
+	_failures += 1
+	push_error("%s — expected %s, got %s" % [message, expected, actual])
+
+
+func _expect_float(actual: float, expected: float, message: String) -> void:
+	if is_equal_approx(actual, expected):
 		return
 	_failures += 1
 	push_error("%s — expected %s, got %s" % [message, expected, actual])

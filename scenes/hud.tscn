@@ -28,3 +28,11 @@ offset_right = 300.0
 offset_bottom = 110.0
 theme_override_font_sizes/font_size = 24
 text = "Dano da Lanceta: 1"
+
+[node name="LancetIntervalLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 106.0
+offset_right = 336.0
+offset_bottom = 140.0
+theme_override_font_sizes/font_size = 24
+text = "Intervalo da Lanceta: 1,00s"

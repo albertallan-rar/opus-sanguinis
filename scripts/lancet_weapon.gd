@@ -2,15 +2,40 @@ class_name LancetWeapon
 extends Node2D
 
 signal damage_changed(current_damage: int)
+signal attack_interval_changed(current_interval: float)
 
 @export var lancet_scene: PackedScene
 @export var attack_range: float = 600.0
 @export var damage: int = 1
+@export var attack_interval: float = 1.0
+@export var minimum_attack_interval: float = 0.2
+@export var attack_interval_multiplier: float = 0.9
+
+@onready var _attack_timer: Timer = $AttackTimer
+
+
+func _ready() -> void:
+	_attack_timer.wait_time = attack_interval
 
 
 func increase_damage(amount: int = 1) -> void:
 	damage += amount
 	damage_changed.emit(damage)
+
+
+func get_next_attack_interval() -> float:
+	return maxf(attack_interval * attack_interval_multiplier, minimum_attack_interval)
+
+
+func increase_attack_speed() -> bool:
+	var next_interval: float = get_next_attack_interval()
+	if is_equal_approx(next_interval, attack_interval):
+		return false
+
+	attack_interval = next_interval
+	_attack_timer.wait_time = attack_interval
+	attack_interval_changed.emit(attack_interval)
+	return true
 
 
 func _on_attack_timer_timeout() -> void:
