@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="Texture2D" uid="uid://df8u0xxb2k20" path="res://assets/backgrounds/gothic_rural_ground.png" id="2_background"]
 [ext_resource type="PackedScene" path="res://scenes/enemy_spawner.tscn" id="3_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="4_hud"]
 
 [node name="Main" type="Node2D" unique_id=214983482]
 
@@ -20,3 +21,5 @@ region_rect = Rect2(-2048, -2048, 4096, 4096)
 position = Vector2(3, 5)
 
 [node name="EnemySpawner" parent="." instance=ExtResource("3_spawner")]
+
+[node name="HUD" parent="." instance=ExtResource("4_hud")]

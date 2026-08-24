@@ -5,8 +5,10 @@ extends CharacterBody2D
 @export var max_health: int = 3
 @export var separation_radius: float = 48.0
 @export var separation_weight: float = 1.5
+@export var xp_pickup_scene: PackedScene
 
 var _target: Node2D
+var _is_dying: bool = false
 @onready var _current_health: int = max_health
 
 
@@ -18,7 +20,20 @@ func take_damage(amount: int) -> void:
 	_current_health -= amount
 
 	if _current_health <= 0:
-		queue_free()
+		_die()
+
+
+func _die() -> void:
+	if _is_dying:
+		return
+
+	_is_dying = true
+	if xp_pickup_scene != null:
+		var pickup: Area2D = xp_pickup_scene.instantiate() as Area2D
+		get_tree().current_scene.call_deferred(&"add_child", pickup)
+		pickup.set_deferred(&"global_position", global_position)
+
+	queue_free()
 
 
 func _physics_process(_delta: float) -> void:
