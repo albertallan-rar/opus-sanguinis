@@ -9,6 +9,7 @@ size = Vector2(16, 4)
 collision_layer = 0
 collision_mask = 2
 script = ExtResource("1_lancet")
+damage = 1
 
 [node name="Visual" type="Polygon2D" parent="."]
 polygon = PackedVector2Array(-8, -2, 8, -2, 8, 2, -8, 2)
