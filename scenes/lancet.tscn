@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/lancet.gd" id="1_lancet"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lancet"]
+size = Vector2(16, 4)
+
+[node name="Lancet" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("1_lancet")
+
+[node name="Visual" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-8, -2, 8, -2, 8, 2, -8, 2)
+color = Color(0.85, 0.78, 0.65, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_lancet")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
