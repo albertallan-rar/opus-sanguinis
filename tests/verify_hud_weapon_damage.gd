@@ -20,12 +20,16 @@ func _run_test() -> void:
 
 	var damage_label: Label = hud.get_node_or_null("LancetDamageLabel") as Label
 	var interval_label: Label = hud.get_node_or_null("LancetIntervalLabel") as Label
+	var health_label: Label = hud.get_node_or_null("HealthLabel") as Label
 	_expect(damage_label != null, "HUD contains a permanent Lancet damage label")
 	_expect(interval_label != null, "HUD contains a permanent Lancet interval label")
+	_expect(health_label != null, "HUD contains a permanent health label")
 	if damage_label != null:
 		_expect_equal(damage_label.text, "Dano da Lanceta: 1", "HUD displays initial weapon damage")
 	if interval_label != null:
 		_expect_equal(interval_label.text, "Intervalo da Lanceta: 1,00s", "HUD displays initial attack interval")
+	if health_label != null:
+		_expect_equal(health_label.text, "Vida: 10 / 10", "HUD displays initial player health")
 
 	var weapon: LancetWeapon = player.get_node("LancetWeapon") as LancetWeapon
 	weapon.increase_damage()
@@ -34,6 +38,9 @@ func _run_test() -> void:
 	weapon.increase_attack_speed()
 	if interval_label != null:
 		_expect_equal(interval_label.text, "Intervalo da Lanceta: 0,90s", "HUD updates when attack interval changes")
+	player.take_damage(3)
+	if health_label != null:
+		_expect_equal(health_label.text, "Vida: 7 / 10", "HUD updates when player health changes")
 
 	current_scene = null
 	world.free()

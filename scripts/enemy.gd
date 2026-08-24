@@ -6,10 +6,13 @@ extends CharacterBody2D
 @export var separation_radius: float = 48.0
 @export var separation_weight: float = 1.5
 @export var xp_pickup_scene: PackedScene
+@export var contact_damage: int = 1
 
 var _target: Node2D
 var _is_dying: bool = false
+var _contact_player: Player
 @onready var _current_health: int = max_health
+@onready var _damage_timer: Timer = $DamageTimer
 
 
 func _ready() -> void:
@@ -21,6 +24,33 @@ func take_damage(amount: int) -> void:
 
 	if _current_health <= 0:
 		_die()
+
+
+func _on_damage_area_body_entered(body: Node2D) -> void:
+	var player: Player = body as Player
+	if player == null or player == _contact_player:
+		return
+
+	_contact_player = player
+	_contact_player.take_damage(contact_damage)
+	_damage_timer.start()
+
+
+func _on_damage_area_body_exited(body: Node2D) -> void:
+	if body != _contact_player:
+		return
+
+	_contact_player = null
+	_damage_timer.stop()
+
+
+func _on_damage_timer_timeout() -> void:
+	if not is_instance_valid(_contact_player):
+		_contact_player = null
+		_damage_timer.stop()
+		return
+
+	_contact_player.take_damage(contact_damage)
 
 
 func _die() -> void:

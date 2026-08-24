@@ -5,6 +5,7 @@ extends CanvasLayer
 @onready var _level_label: Label = $LevelLabel
 @onready var _lancet_damage_label: Label = $LancetDamageLabel
 @onready var _lancet_interval_label: Label = $LancetIntervalLabel
+@onready var _health_label: Label = $HealthLabel
 
 
 func _ready() -> void:
@@ -14,8 +15,10 @@ func _ready() -> void:
 
 	player.connect(&"experience_changed", _on_experience_changed)
 	player.connect(&"leveled_up", _on_leveled_up)
+	player.connect(&"health_changed", _on_health_changed)
 	_on_experience_changed(player.get("experience"), player.get("experience_required"))
 	_on_leveled_up(player.get("level"))
+	_on_health_changed(player.get("current_health"), player.get("max_health"))
 
 	var weapon: LancetWeapon = player.get_node("LancetWeapon") as LancetWeapon
 	weapon.damage_changed.connect(_on_lancet_damage_changed)
@@ -39,3 +42,7 @@ func _on_lancet_damage_changed(current_damage: int) -> void:
 func _on_lancet_interval_changed(current_interval: float) -> void:
 	var formatted: String = ("%.2f" % current_interval).replace(".", ",")
 	_lancet_interval_label.text = "Intervalo da Lanceta: %ss" % formatted
+
+
+func _on_health_changed(current_health: int, maximum_health: int) -> void:
+	_health_label.text = "Vida: %d / %d" % [current_health, maximum_health]

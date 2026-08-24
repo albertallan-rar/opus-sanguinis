@@ -5,34 +5,42 @@
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
 
-[node name="LevelLabel" type="Label" parent="."]
+[node name="HealthLabel" type="Label" parent="."]
 offset_left = 16.0
 offset_top = 16.0
-offset_right = 200.0
+offset_right = 236.0
 offset_bottom = 50.0
 theme_override_font_sizes/font_size = 24
-text = "Level: 1"
+text = "Vida: 10 / 10"
 
-[node name="ExperienceLabel" type="Label" parent="."]
+[node name="LevelLabel" type="Label" parent="."]
 offset_left = 16.0
 offset_top = 46.0
 offset_right = 200.0
 offset_bottom = 80.0
 theme_override_font_sizes/font_size = 24
+text = "Level: 1"
+
+[node name="ExperienceLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 76.0
+offset_right = 200.0
+offset_bottom = 110.0
+theme_override_font_sizes/font_size = 24
 text = "XP: 0 / 5"
 
 [node name="LancetDamageLabel" type="Label" parent="."]
 offset_left = 16.0
-offset_top = 76.0
+offset_top = 106.0
 offset_right = 300.0
-offset_bottom = 110.0
+offset_bottom = 140.0
 theme_override_font_sizes/font_size = 24
 text = "Dano da Lanceta: 1"
 
 [node name="LancetIntervalLabel" type="Label" parent="."]
 offset_left = 16.0
-offset_top = 106.0
+offset_top = 136.0
 offset_right = 336.0
-offset_bottom = 140.0
+offset_bottom = 170.0
 theme_override_font_sizes/font_size = 24
 text = "Intervalo da Lanceta: 1,00s"
