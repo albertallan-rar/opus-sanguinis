@@ -2,6 +2,7 @@ class_name HUD
 extends CanvasLayer
 
 @onready var _experience_label: Label = $ExperienceLabel
+@onready var _level_label: Label = $LevelLabel
 
 
 func _ready() -> void:
@@ -10,8 +11,14 @@ func _ready() -> void:
 		return
 
 	player.connect(&"experience_changed", _on_experience_changed)
-	_on_experience_changed(player.get("experience"))
+	player.connect(&"leveled_up", _on_leveled_up)
+	_on_experience_changed(player.get("experience"), player.get("experience_required"))
+	_on_leveled_up(player.get("level"))
 
 
-func _on_experience_changed(current_experience: int) -> void:
-	_experience_label.text = "XP: %d" % current_experience
+func _on_experience_changed(current_experience: int, required_experience: int) -> void:
+	_experience_label.text = "XP: %d / %d" % [current_experience, required_experience]
+
+
+func _on_leveled_up(new_level: int) -> void:
+	_level_label.text = "Level: %d" % new_level
