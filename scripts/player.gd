@@ -15,6 +15,9 @@ var level: int = 1
 var current_health: int = max_health
 var _is_dead: bool = false
 
+@onready var _damage_indicator: Label = $DamageIndicator
+@onready var _damage_indicator_timer: Timer = $DamageIndicatorTimer
+
 
 func gain_experience(amount: int) -> void:
 	experience += amount
@@ -22,6 +25,7 @@ func gain_experience(amount: int) -> void:
 	while experience >= experience_required:
 		experience -= experience_required
 		level += 1
+		experience_required = 5 + (level - 1) * 2
 		leveled_up.emit(level)
 
 	experience_changed.emit(experience, experience_required)
@@ -32,6 +36,10 @@ func take_damage(amount: int) -> void:
 		return
 
 	current_health = maxi(current_health - amount, 0)
+	if _damage_indicator != null and _damage_indicator_timer != null:
+		_damage_indicator.text = "-%d" % amount
+		_damage_indicator.visible = true
+		_damage_indicator_timer.start()
 	health_changed.emit(current_health, max_health)
 	if current_health > 0:
 		return
@@ -39,6 +47,11 @@ func take_damage(amount: int) -> void:
 	_is_dead = true
 	velocity = Vector2.ZERO
 	died.emit()
+
+
+func _on_damage_indicator_timer_timeout() -> void:
+	if _damage_indicator != null:
+		_damage_indicator.visible = false
 
 
 func _physics_process(_delta: float) -> void:

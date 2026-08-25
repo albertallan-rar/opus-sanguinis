@@ -10,6 +10,8 @@ func _initialize() -> void:
 func _run_tests() -> void:
 	await _test_stage_boundaries_apply_once()
 	await _test_large_time_jump_applies_only_final_stage()
+	await _test_spawned_enemy_receives_current_stage_attributes()
+	await _test_stage_ten_enemy_receives_final_combat_attributes()
 	_finish()
 
 
@@ -40,16 +42,26 @@ func _test_stage_boundaries_apply_once() -> void:
 
 	flow._process(1.0)
 	_expect_equal(spawner.get("difficulty_level"), 2, "60 seconds activates threat II")
-	_expect_float(timer.wait_time, 1.5, "threat II reduces spawn interval")
-	_expect_equal(spawner.max_enemies, 15, "threat II raises enemy cap")
+	_expect_float(timer.wait_time, 1.8, "threat II reduces spawn interval")
+	_expect_equal(spawner.max_enemies, 12, "threat II raises enemy cap")
 
 	flow._process(59.0)
 	_expect_equal(spawner.get("difficulty_level"), 2, "119 seconds remains at threat II")
 	flow._process(1.0)
 	_expect_equal(spawner.get("difficulty_level"), 3, "120 seconds activates threat III")
-	_expect_float(timer.wait_time, 1.0, "threat III reduces interval to one second")
-	_expect_equal(spawner.max_enemies, 20, "threat III raises enemy cap")
-	_expect_equal(events, [2, 3], "each stage transition emits once")
+	_expect_float(timer.wait_time, 1.6, "threat III reduces spawn interval")
+	_expect_equal(spawner.max_enemies, 14, "threat III raises enemy cap")
+
+	flow._process(120.0)
+	_expect_equal(spawner.get("difficulty_level"), 5, "240 seconds activates threat V")
+	_expect_float(timer.wait_time, 1.2, "threat V reduces spawn interval")
+	_expect_equal(spawner.max_enemies, 18, "threat V raises enemy cap")
+
+	flow._process(300.0)
+	_expect_equal(spawner.get("difficulty_level"), 10, "540 seconds activates threat X")
+	_expect_float(timer.wait_time, 0.6, "threat X reaches final spawn interval")
+	_expect_equal(spawner.max_enemies, 28, "threat X reaches final enemy cap")
+	_expect_equal(events, [2, 3, 5, 10], "each reached stage emits once")
 	flow.free()
 
 
@@ -68,10 +80,56 @@ func _test_large_time_jump_applies_only_final_stage() -> void:
 
 	var events: Array[int] = []
 	spawner.connect(&"difficulty_changed", func(level: int) -> void: events.append(level))
-	flow._process(130.0)
+	flow._process(590.0)
 
-	_expect_equal(spawner.get("difficulty_level"), 3, "large time jump applies threat III")
-	_expect_equal(events, [3], "large time jump emits only the final stage")
+	_expect_equal(spawner.get("difficulty_level"), 10, "large time jump applies threat X")
+	_expect_equal(events, [10], "large time jump emits only the final stage")
+	flow.free()
+
+
+func _test_spawned_enemy_receives_current_stage_attributes() -> void:
+	var flow: GameFlow = GameFlow.new()
+	var player: Player = preload("res://scenes/player.tscn").instantiate()
+	var spawner: EnemySpawner = preload("res://scenes/enemy_spawner.tscn").instantiate()
+	flow.add_child(player)
+	flow.add_child(spawner)
+	root.add_child(flow)
+	await process_frame
+
+	spawner.call(&"_on_survival_time_changed", 240)
+	spawner.call(&"_on_timer_timeout")
+	await process_frame
+
+	var enemies: Array[Node] = get_nodes_in_group(&"enemies")
+	_expect_equal(enemies.size(), 1, "spawner creates one enemy for attribute validation")
+	if enemies.size() == 1:
+		var enemy: Enemy = enemies[0] as Enemy
+		_expect_equal(enemy.max_health, 7, "threat V enemy spawns with seven health")
+		_expect_float(enemy.speed, 140.0, "threat V enemy spawns with increased speed")
+		_expect_equal(enemy.contact_damage, 2, "threat V enemy spawns with two contact damage")
+	flow.free()
+
+
+func _test_stage_ten_enemy_receives_final_combat_attributes() -> void:
+	var flow: GameFlow = GameFlow.new()
+	var player: Player = preload("res://scenes/player.tscn").instantiate()
+	var spawner: EnemySpawner = preload("res://scenes/enemy_spawner.tscn").instantiate()
+	flow.add_child(player)
+	flow.add_child(spawner)
+	root.add_child(flow)
+	await process_frame
+
+	spawner.call(&"_on_survival_time_changed", 540)
+	spawner.call(&"_on_timer_timeout")
+	await process_frame
+
+	var enemies: Array[Node] = get_nodes_in_group(&"enemies")
+	_expect_equal(enemies.size(), 1, "threat X creates one enemy for final attribute validation")
+	if enemies.size() == 1:
+		var enemy: Enemy = enemies[0] as Enemy
+		_expect_equal(enemy.max_health, 12, "threat X enemy spawns with twelve health")
+		_expect_float(enemy.speed, 160.0, "threat X enemy spawns with final speed")
+		_expect_equal(enemy.contact_damage, 3, "threat X enemy spawns with three contact damage")
 	flow.free()
 
 

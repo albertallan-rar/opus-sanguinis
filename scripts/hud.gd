@@ -70,5 +70,7 @@ func _on_survival_time_changed(total_seconds: int) -> void:
 
 
 func _on_difficulty_changed(level: int) -> void:
-	var roman_level: String = ["I", "II", "III"][clampi(level, 1, 3) - 1]
+	var roman_level: String = [
+		"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"
+	][clampi(level, 1, 10) - 1]
 	_threat_level_label.text = "Ameaça: %s" % roman_level

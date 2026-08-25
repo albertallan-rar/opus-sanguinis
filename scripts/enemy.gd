@@ -13,17 +13,24 @@ var _is_dying: bool = false
 var _contact_player: Player
 @onready var _current_health: int = max_health
 @onready var _damage_timer: Timer = $DamageTimer
+@onready var _health_label: Label = $HealthLabel
 
 
 func _ready() -> void:
 	_target = get_tree().get_first_node_in_group(&"player") as Node2D
+	_update_health_indicator()
 
 
 func take_damage(amount: int) -> void:
 	_current_health -= amount
+	_update_health_indicator()
 
 	if _current_health <= 0:
 		_die()
+
+
+func _update_health_indicator() -> void:
+	_health_label.text = "%d / %d" % [maxi(_current_health, 0), max_health]
 
 
 func _on_damage_area_body_entered(body: Node2D) -> void:
