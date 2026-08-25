@@ -54,6 +54,7 @@ func _on_timer_timeout() -> void:
 		return
 
 	enemy.max_health = difficulty_level + 2
+	enemy.xp_drop_stage = difficulty_level
 	if difficulty_level >= 10:
 		enemy.speed = 160.0
 		enemy.contact_damage = 3

@@ -6,6 +6,7 @@ extends CharacterBody2D
 @export var separation_radius: float = 48.0
 @export var separation_weight: float = 1.5
 @export var xp_pickup_scene: PackedScene
+@export_range(1, 10) var xp_drop_stage: int = 1
 @export var contact_damage: int = 1
 
 var _target: Node2D
@@ -31,6 +32,18 @@ func take_damage(amount: int) -> void:
 
 func _update_health_indicator() -> void:
 	_health_label.text = "%d / %d" % [maxi(_current_health, 0), max_health]
+
+
+func get_xp_value_for_roll(roll: float) -> int:
+	if xp_drop_stage >= 10:
+		if roll >= 0.85:
+			return 3
+		if roll >= 0.50:
+			return 2
+	elif xp_drop_stage >= 5 and roll >= 0.70:
+		return 2
+
+	return 1
 
 
 func _on_damage_area_body_entered(body: Node2D) -> void:
@@ -66,7 +79,8 @@ func _die() -> void:
 
 	_is_dying = true
 	if xp_pickup_scene != null:
-		var pickup: Area2D = xp_pickup_scene.instantiate() as Area2D
+		var pickup: XPPickup = xp_pickup_scene.instantiate() as XPPickup
+		pickup.configure(get_xp_value_for_roll(randf()))
 		get_tree().current_scene.call_deferred(&"add_child", pickup)
 		pickup.set_deferred(&"global_position", global_position)
 
