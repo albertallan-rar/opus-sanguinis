@@ -53,8 +53,13 @@ func _run_test() -> void:
 		_expect_equal(new_player.current_health, 10, "restart restores health")
 		_expect_equal(new_player.get_node("LancetWeapon").get("damage"), 1, "restart resets weapon damage")
 		_expect_equal(new_flow.survival_seconds, 0, "restart resets survival time")
+		var new_spawner: EnemySpawner = current_scene.get_node("EnemySpawner") as EnemySpawner
+		_expect_equal(new_spawner.difficulty_level, 1, "restart resets threat level")
+		_expect_equal(new_spawner.max_enemies, 10, "restart resets enemy cap")
+		_expect_float(new_spawner.get_node("Timer").get("wait_time"), 2.0, "restart resets spawn interval")
 		var new_hud: HUD = current_scene.get_node("HUD") as HUD
 		_expect_equal(new_hud.get_node("SurvivalTimeLabel").get("text"), "Tempo: 00:00", "restarted HUD displays zero time")
+		_expect_equal(new_hud.get_node("ThreatLevelLabel").get("text"), "Ameaça: I", "restarted HUD displays threat I")
 
 	_cleanup(current_scene if current_scene != null else main)
 	_finish()
@@ -86,6 +91,13 @@ func _expect(condition: bool, message: String) -> void:
 
 func _expect_equal(actual: Variant, expected: Variant, message: String) -> void:
 	if actual == expected:
+		return
+	_failures += 1
+	push_error("%s — expected %s, got %s" % [message, expected, actual])
+
+
+func _expect_float(actual: float, expected: float, message: String) -> void:
+	if is_equal_approx(actual, expected):
 		return
 	_failures += 1
 	push_error("%s — expected %s, got %s" % [message, expected, actual])

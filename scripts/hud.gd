@@ -2,6 +2,7 @@ class_name HUD
 extends CanvasLayer
 
 var _game_flow: GameFlow
+var _enemy_spawner: EnemySpawner
 
 @onready var _experience_label: Label = $ExperienceLabel
 @onready var _level_label: Label = $LevelLabel
@@ -9,6 +10,7 @@ var _game_flow: GameFlow
 @onready var _lancet_interval_label: Label = $LancetIntervalLabel
 @onready var _health_label: Label = $HealthLabel
 @onready var _survival_time_label: Label = $SurvivalTimeLabel
+@onready var _threat_level_label: Label = $ThreatLevelLabel
 
 
 func _ready() -> void:
@@ -16,6 +18,11 @@ func _ready() -> void:
 	if _game_flow != null:
 		_game_flow.survival_time_changed.connect(_on_survival_time_changed)
 		_on_survival_time_changed(_game_flow.survival_seconds)
+
+	_enemy_spawner = get_parent().get_node_or_null("EnemySpawner") as EnemySpawner
+	if _enemy_spawner != null:
+		_enemy_spawner.difficulty_changed.connect(_on_difficulty_changed)
+		_on_difficulty_changed(_enemy_spawner.difficulty_level)
 
 	var player: Node = get_tree().get_first_node_in_group(&"player")
 	if player == null:
@@ -60,3 +67,8 @@ func _on_survival_time_changed(total_seconds: int) -> void:
 	var minutes: int = floori(total_seconds / 60.0)
 	var seconds: int = total_seconds % 60
 	_survival_time_label.text = "Tempo: %02d:%02d" % [minutes, seconds]
+
+
+func _on_difficulty_changed(level: int) -> void:
+	var roman_level: String = ["I", "II", "III"][clampi(level, 1, 3) - 1]
+	_threat_level_label.text = "Ameaça: %s" % roman_level

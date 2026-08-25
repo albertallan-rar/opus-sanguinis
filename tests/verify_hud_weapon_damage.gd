@@ -11,6 +11,8 @@ func _run_test() -> void:
 	var world: GameFlow = GameFlow.new()
 	var player: Player = preload("res://scenes/player.tscn").instantiate()
 	world.add_child(player)
+	var spawner: EnemySpawner = preload("res://scenes/enemy_spawner.tscn").instantiate()
+	world.add_child(spawner)
 	var hud: HUD = preload("res://scenes/hud.tscn").instantiate()
 	world.add_child(hud)
 	root.add_child(world)
@@ -21,10 +23,12 @@ func _run_test() -> void:
 	var interval_label: Label = hud.get_node_or_null("LancetIntervalLabel") as Label
 	var health_label: Label = hud.get_node_or_null("HealthLabel") as Label
 	var survival_time_label: Label = hud.get_node_or_null("SurvivalTimeLabel") as Label
+	var threat_level_label: Label = hud.get_node_or_null("ThreatLevelLabel") as Label
 	_expect(damage_label != null, "HUD contains a permanent Lancet damage label")
 	_expect(interval_label != null, "HUD contains a permanent Lancet interval label")
 	_expect(health_label != null, "HUD contains a permanent health label")
 	_expect(survival_time_label != null, "HUD contains a survival time label")
+	_expect(threat_level_label != null, "HUD contains a threat level label")
 	if damage_label != null:
 		_expect_equal(damage_label.text, "Dano da Lanceta: 1", "HUD displays initial weapon damage")
 	if interval_label != null:
@@ -33,6 +37,8 @@ func _run_test() -> void:
 		_expect_equal(health_label.text, "Vida: 10 / 10", "HUD displays initial player health")
 	if survival_time_label != null:
 		_expect_equal(survival_time_label.text, "Tempo: 00:00", "HUD displays zero survival time initially")
+	if threat_level_label != null:
+		_expect_equal(threat_level_label.text, "Ameaça: I", "HUD displays threat I initially")
 
 	var weapon: LancetWeapon = player.get_node("LancetWeapon") as LancetWeapon
 	weapon.increase_damage()
@@ -47,6 +53,11 @@ func _run_test() -> void:
 	world._process(65.0)
 	if survival_time_label != null:
 		_expect_equal(survival_time_label.text, "Tempo: 01:05", "HUD formats and updates survival time")
+	if threat_level_label != null:
+		_expect_equal(threat_level_label.text, "Ameaça: II", "HUD updates to threat II after one minute")
+	world._process(55.0)
+	if threat_level_label != null:
+		_expect_equal(threat_level_label.text, "Ameaça: III", "HUD updates to threat III after two minutes")
 
 	current_scene = null
 	world.free()
